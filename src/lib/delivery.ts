@@ -3,6 +3,9 @@ export const DELIVERY_RANGES = [
   { maxKm: 3, feeCents: 1000 },
   { maxKm: 5, feeCents: 1500 },
   { maxKm: 8, feeCents: 2500 },
+  { maxKm: 11, feeCents: 3500 },
+  { maxKm: 13, feeCents: 4500 },
+  { maxKm: 16, feeCents: 5000 },
 ]
 export const DELIVERY_MAX_KM = DELIVERY_RANGES[DELIVERY_RANGES.length - 1].maxKm
 
