@@ -8,11 +8,11 @@ import { CURRENCY } from '@/lib/menu'
 const API = 'https://api.paystack.co'
 
 export function paystackEnabled() {
-  return Boolean(process.env.PAYSTACK_SECRET_KEY)
+  return Boolean(Netlify.env.get('PAYSTACK_SECRET_KEY'))
 }
 
 function secretKey() {
-  const key = process.env.PAYSTACK_SECRET_KEY
+  const key = Netlify.env.get('PAYSTACK_SECRET_KEY')
   if (!key) throw new Error('Online payment is not configured')
   return key
 }
