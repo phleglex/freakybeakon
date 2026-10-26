@@ -1,22 +1,20 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { env } from "node:process";
-import { and, eq, ne } from "drizzle-orm";
-import { db } from "../../db/index.js";
-import { orders } from "../../db/schema.js";
-import { CURRENCY } from "@/lib/menu";
+import { createHmac, timingSafeEqual } from 'node:crypto'
+import { and, eq, ne } from 'drizzle-orm'
+import { db } from '../../db/index.js'
+import { orders } from '../../db/schema.js'
+import { CURRENCY } from '@/lib/menu'
 
 // Server-only Paystack helpers. The secret key never leaves the server.
-const API = "https://api.paystack.co";
+const API = 'https://api.paystack.co'
 
 export function paystackEnabled() {
-  return Boolean(env.PAYSTACK_SECRET_KEY);
+  return Boolean(process.env.PAYSTACK_SECRET_KEY)
 }
 
 function secretKey() {
-  // Read Node's environment at request time; avoid bundler replacement of process.env.*.
-  const key = env.PAYSTACK_SECRET_KEY;
-  if (!key) throw new Error("Online payment is not configured");
-  return key;
+  const key = process.env.PAYSTACK_SECRET_KEY
+  if (!key) throw new Error('Online payment is not configured')
+  return key
 }
 
 async function paystackFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -24,103 +22,81 @@ async function paystackFetch<T>(path: string, init?: RequestInit): Promise<T> {
     ...init,
     headers: {
       Authorization: `Bearer ${secretKey()}`,
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
-  });
+  })
   const body = (await res.json().catch(() => null)) as {
-    status?: boolean;
-    message?: string;
-    data?: T;
-  } | null;
+    status?: boolean
+    message?: string
+    data?: T
+  } | null
   if (!res.ok || !body?.status || !body.data) {
-    throw new Error(`Paystack request failed: ${body?.message ?? res.status}`);
+    throw new Error(`Paystack request failed: ${body?.message ?? res.status}`)
   }
-  return body.data;
+  return body.data
 }
 
 export async function initializeTransaction(opts: {
-  email: string;
-  amountCents: number;
-  reference: string;
-  callbackUrl: string;
-  orderCode: string;
+  email: string
+  amountCents: number
+  reference: string
+  callbackUrl: string
+  orderCode: string
 }) {
-  const data = await paystackFetch<{ authorization_url: string }>(
-    "/transaction/initialize",
-    {
-      method: "POST",
-      body: JSON.stringify({
-        email: opts.email,
-        // Paystack expects the amount in the currency's subunit (pesewas).
-        amount: opts.amountCents,
-        currency: CURRENCY,
-        reference: opts.reference,
-        callback_url: opts.callbackUrl,
-        metadata: { order_code: opts.orderCode },
-      }),
-    },
-  );
-  return data.authorization_url;
+  const data = await paystackFetch<{ authorization_url: string }>('/transaction/initialize', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: opts.email,
+      // Paystack expects the amount in the currency's subunit (pesewas).
+      amount: opts.amountCents,
+      currency: CURRENCY,
+      reference: opts.reference,
+      callback_url: opts.callbackUrl,
+      metadata: { order_code: opts.orderCode },
+    }),
+  })
+  return data.authorization_url
 }
 
 type Transaction = {
-  status: string;
-  amount: number;
-  currency: string;
-  reference: string;
-  paid_at?: string | null;
-};
+  status: string
+  amount: number
+  currency: string
+  reference: string
+  paid_at?: string | null
+}
 
 /**
  * Checks a transaction with Paystack and records the result on the matching order.
  * Only marks an order paid when the amount and currency match what we charged.
  */
 export async function syncPayment(reference: string) {
-  const [order] = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.paymentReference, reference))
-    .limit(1);
-  if (!order || order.paymentStatus === "paid")
-    return order?.paymentStatus ?? null;
+  const [order] = await db.select().from(orders).where(eq(orders.paymentReference, reference)).limit(1)
+  if (!order || order.paymentStatus === 'paid') return order?.paymentStatus ?? null
 
-  const tx = await paystackFetch<Transaction>(
-    `/transaction/verify/${encodeURIComponent(reference)}`,
-  );
-  let paymentStatus: "paid" | "failed" | "pending" = "pending";
-  if (
-    tx.status === "success" &&
-    tx.amount === order.totalCents &&
-    tx.currency === CURRENCY
-  )
-    paymentStatus = "paid";
+  const tx = await paystackFetch<Transaction>(`/transaction/verify/${encodeURIComponent(reference)}`)
+  let paymentStatus: 'paid' | 'failed' | 'pending' = 'pending'
+  if (tx.status === 'success' && tx.amount === order.totalCents && tx.currency === CURRENCY) paymentStatus = 'paid'
   // 'abandoned' just means checkout was opened but not finished, so the customer can still pay.
-  else if (tx.status === "failed" || tx.status === "success")
-    paymentStatus = "failed";
+  else if (tx.status === 'failed' || tx.status === 'success') paymentStatus = 'failed'
 
-  if (paymentStatus !== "pending") {
+  if (paymentStatus !== 'pending') {
     await db
       .update(orders)
       .set({
         paymentStatus,
-        paidAt:
-          paymentStatus === "paid" ? new Date(tx.paid_at ?? Date.now()) : null,
+        paidAt: paymentStatus === 'paid' ? new Date(tx.paid_at ?? Date.now()) : null,
       })
-      .where(and(eq(orders.id, order.id), ne(orders.paymentStatus, "paid")));
+      .where(and(eq(orders.id, order.id), ne(orders.paymentStatus, 'paid')))
   }
-  return paymentStatus;
+  return paymentStatus
 }
 
 /** Validates the x-paystack-signature header (HMAC SHA512 of the raw body). */
-export function validWebhookSignature(
-  rawBody: string,
-  signature: string | null,
-) {
-  if (!signature || !paystackEnabled()) return false;
-  const expected = createHmac("sha512", secretKey())
-    .update(rawBody)
-    .digest("hex");
-  const a = Buffer.from(expected);
-  const b = Buffer.from(signature);
-  return a.length === b.length && timingSafeEqual(a, b);
+export function validWebhookSignature(rawBody: string, signature: string | null) {
+  if (!signature || !paystackEnabled()) return false
+  const expected = createHmac('sha512', secretKey()).update(rawBody).digest('hex')
+  const a = Buffer.from(expected)
+  const b = Buffer.from(signature)
+  return a.length === b.length && timingSafeEqual(a, b)
 }
