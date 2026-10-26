@@ -32,7 +32,7 @@ export const menu: MenuItem[] = [
     description: 'Golden, crispy chicken tenders. Perfect for dipping.',
     priceCents: 0, // Replace with actual price
     category: 'tenders',
-    image: 'tenders', // Add picture path
+    image: 'tenders.jpg', // Add picture path
     tags: [],
   },
 
@@ -43,7 +43,7 @@ export const menu: MenuItem[] = [
     description: 'A classic crispy chicken burger.',
     priceCents: 0,
     category: 'burgers',
-    image: 'burger',
+    image: 'burger.jpg',
     tags: [],
   },
   {
@@ -52,27 +52,27 @@ export const menu: MenuItem[] = [
     description: 'A fiery chicken burger for heat seekers.',
     priceCents: 0,
     category: 'burgers',
-    image: 'nuclear_burger',
+    image: 'nuclear_burger.jpg',
     tags: ['spicy'],
   },
 
   // Fried Chicken
   {
-    id: 'thighs',
-    name: 'Thighs',
-    description: 'Crispy, juicy fried chicken thighs.',
+    id: 'quarters',
+    name: 'Quarters',
+    description: 'Crispy, juicy fried chicken Quarters.',
     priceCents: 0,
     category: 'fried-chicken',
-    image: 'thighs',
+    image: 'quarters.jpg',
     tags: [],
   },
   {
-    id: 'nuclear-thighs',
-    name: 'Nuclear Thighs',
-    description: 'Crispy fried chicken thighs with a spicy kick.',
+    id: 'nuclear-quarters',
+    name: 'Nuclear quarters',
+    description: 'Crispy fried chicken quarters with a spicy kick.',
     priceCents: 0,
     category: 'fried-chicken',
-    image: 'nuclear_thighs',
+    image: 'nuclear_quarters.jpg',
     tags: ['spicy'],
   },
 
@@ -83,7 +83,7 @@ export const menu: MenuItem[] = [
     description: 'Our signature yellow dipping sauce.',
     priceCents: 0,
     category: 'sauces',
-    image: 'yellow_sauce',
+    image: 'yellow_sauce.jpg',
     tags: [],
   },
   {
@@ -92,7 +92,7 @@ export const menu: MenuItem[] = [
     description: 'Our signature Bomb Sauce.',
     priceCents: 0,
     category: 'sauces',
-    image: 'bomb_sauce',
+    image: 'bomb_sauce.jpg',
     tags: [],
   },
   {
@@ -101,7 +101,7 @@ export const menu: MenuItem[] = [
     description: 'A sweet honey dipping sauce.',
     priceCents: 0,
     category: 'sauces',
-    image: 'honey_sauce',
+    image: 'honey_sauce.jpg',
     tags: [],
   },
 
@@ -112,7 +112,7 @@ export const menu: MenuItem[] = [
     description: 'A cool, crunchy side.',
     priceCents: 0,
     category: 'sides',
-    image: 'coleslaw',
+    image: 'coleslaw.jpg',
     tags: [],
   },
 
@@ -123,25 +123,25 @@ export const menu: MenuItem[] = [
     description: 'Chilled yoghurt.',
     priceCents: 0,
     category: 'drinks',
-    image: 'yoghurt',
+    image: 'yoghurt.jpg',
     tags: [],
   },
   {
     id: 'coca-cola',
     name: 'Coca-Cola',
     description: 'Chilled Coca-Cola.',
-    priceCents: 0,
+    priceCents: 1000,
     category: 'drinks',
-    image: 'coke',
+    image: 'coke.jpg',
     tags: [],
   },
   {
     id: 'diet-coke',
     name: 'Diet Coke',
     description: 'Chilled Diet Coke.',
-    priceCents: 0,
+    priceCents: 1500,
     category: 'drinks',
-    image: 'diet_coke',
+    image: 'diet_coke.jpg',
     tags: [],
   },
 ]
